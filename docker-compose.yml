@@ -1,0 +1,40 @@
+version: '3.5'
+
+services:
+  task_manager_postgres_db:
+    container_name: task_manager_postgres_db
+    image: postgres:14
+    environment:
+      POSTGRES_USER: task_manager
+      POSTGRES_PASSWORD: task_manager
+      PGDATA: /data/postgres
+    volumes:
+      - postgress:/d/GoIT/Git/task-manager/task-manager-backend/docker-volumes/postgres
+    ports:
+      - 127.0.0.1:5432:5432
+    networks:
+      - task_manager
+    restart: unless-stopped
+
+  task_manager_pgadmin:
+    container_name: task_manager_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ivan.reshetnikov.t@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: task_manager
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/d/GoIT/Git/task-manager/task-manager-backend/docker-volumes/pgadmin
+    ports:
+      - 127.0.0.1:5050:80
+    networks:
+      - task_manager
+    restart: unless-stopped
+
+networks:
+  task_manager:
+    driver: bridge
+
+volumes:
+  postgress:
+  pgadmin:
