@@ -1,41 +1,46 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { hash } from 'bcrypt';
+import {
+  BadRequestException,
+  UnauthorizedException,
+  Injectable,
+} from '@nestjs/common';
+import { compare } from 'bcrypt';
 
-// import { User } from './user.entity';
+import { UserService } from '@entities/user/user.service';
+import { CreateUserDto } from '@entities/user/dto/createUser.dto';
+import { LoginUserDto } from '@entities/user/dto/loginUser.dto';
+import { TokenService } from 'src/token/token.service';
 
 @Injectable()
 export class AuthService {
-  // constructor(
-  //   @InjectRepository(User) private readonly userRepository: Repository<User>
-  // ) {}
-  // // ============================================ Register new user
-  // public async createUser(userData: CreateUserDto) {
-  //   const password = await hash(userData.password, 10);
-  //   const newUser = this.userRepository.create({
-  //     ...userData,
-  //     password,
-  //   });
-  //   return await this.userRepository.save(newUser);
-  // }
-  // // ============================================ Get user data by id
-  // public async getUserById(id: number) {
-  //   return await this.userRepository.findOne({
-  //     where: { id },
-  //     select: ['id', 'email', 'role'],
-  //   });
-  // }
-  // // ============================================ Get all users
-  // public async getAllUsers() {
-  //   return await this.userRepository.find({ select: ['id', 'email', 'role'] });
-  // }
-  // // ============================================ Update user data
-  // public async updateUserData(id: number, userData: UpdateUserDto) {
-  //   return await this.userRepository.update({ id }, userData);
-  // }
-  // // ============================================ Delete user
-  // public async deleteUser(id: number) {
-  //   return await this.userRepository.delete(id);
-  // }
+  constructor(
+    private readonly userService: UserService,
+    private readonly tokenService: TokenService
+  ) {}
+
+  // ============================================ Register user
+  async registerUser(userData: CreateUserDto) {
+    const existUser = await this.userService.findUserByEmail(userData.email);
+
+    if (existUser) throw new BadRequestException('Email already in use');
+
+    await this.userService.createUser(userData);
+  }
+
+  // ============================================ Login user
+  async loginUser(userData: LoginUserDto) {
+    const existUser = await this.userService.findUserByEmail(userData.email);
+
+    if (!existUser) throw new BadRequestException('User not found');
+
+    const validPassword = await compare(userData.password, existUser.password);
+
+    if (!validPassword)
+      throw new UnauthorizedException('Email or password is wrong');
+
+    const { password, ...user } = existUser;
+
+    const token = await this.tokenService.generateJwtToken(user);
+
+    return { user, token };
+  }
 }

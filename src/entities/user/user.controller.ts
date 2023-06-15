@@ -2,18 +2,17 @@ import {
   Controller,
   Delete,
   Get,
-  Post,
   Put,
   Req,
   Body,
   Res,
   Param,
   ParseIntPipe,
-  BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { JwtAuthGuard } from 'src/guards/jwt-guard';
 
-import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 
 import { UserService } from './user.service';
@@ -21,19 +20,6 @@ import { UserService } from './user.service';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  // ============================================ Register new user
-  @Post('/')
-  async createUser(@Body() userData: CreateUserDto, @Res() res: Response) {
-    const existUser = await this.userService.findUserByEmail(userData.email);
-
-    if (existUser)
-      throw new BadRequestException({ message: 'Email already in use' });
-
-    await this.userService.createUser(userData);
-
-    res.status(201).send({ message: 'User successfully created' });
-  }
 
   // ============================================ Get user data by id
   @Get('/:id')
@@ -56,6 +42,7 @@ export class UserController {
   }
 
   // ============================================ Update user data
+  @UseGuards(JwtAuthGuard)
   @Put('/:id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -67,6 +54,8 @@ export class UserController {
     res.status(200).send({ message: 'User successfully updated' });
   }
 
+  // ============================================ Delete user
+  @UseGuards(JwtAuthGuard)
   @Delete('/:id')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,

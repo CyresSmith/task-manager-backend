@@ -1,15 +1,23 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule as NestTypeOrmModule } from '@nestjs/typeorm';
 
+const {
+  POSTGRES_HOST,
+  POSTGRES_PORT,
+  POSTGRES_USERNAME,
+  POSTGRES_PASSWORD,
+  POSTGRES_DATABASE,
+} = process.env;
+
 @Module({
   imports: [
     NestTypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: Number(process.env.POSTGRES_PORT),
-      username: process.env.POSTGRES_USERNAME,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DATABASE,
+      host: POSTGRES_HOST,
+      port: Number(POSTGRES_PORT),
+      username: POSTGRES_USERNAME,
+      password: POSTGRES_PASSWORD,
+      database: POSTGRES_DATABASE,
       entities: ['dist/entities/**/*.entity.js'],
       //   migrations: ['dist/db/migrations/**/*.js'],
       synchronize: true,
