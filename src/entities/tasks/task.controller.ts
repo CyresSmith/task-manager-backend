@@ -69,14 +69,16 @@ export class TaskController {
     @Query() query: { category: Category },
     @Res() res: Response
   ) {
-    const existCategory = await this.categoryService.getCategoryById(
-      Number(query.category)
-    );
-
-    if (!existCategory)
-      throw new BadRequestException(
-        `Category with id "${query.category}" not found`
+    if (query.category) {
+      const existCategory = await this.categoryService.getCategoryById(
+        Number(query.category)
       );
+
+      if (!existCategory)
+        throw new BadRequestException(
+          `Category with id "${query.category}" not found`
+        );
+    }
 
     const tasks = await this.taskService.getAllTasks(query.category);
 
