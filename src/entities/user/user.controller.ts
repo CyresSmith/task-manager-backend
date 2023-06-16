@@ -9,11 +9,17 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { JwtAuthGuard } from 'src/guards/jwt-guard';
+import { AdminAccessGuard } from 'src/guards/adminAccess.guard';
+import { JwtAuthGuard } from 'src/guards/jwt.guard';
 
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { UpdateUserRoleDto } from './dto/updateUserRole.dto';
 
 import { UserService } from './user.service';
 
@@ -45,13 +51,40 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Put('/:id')
   async updateUser(
+    @Req() req,
     @Param('id', ParseIntPipe) id: number,
     @Body() userData: UpdateUserDto,
     @Res() res: Response
   ) {
-    await this.userService.updateUserData(id, userData);
+    if (id !== req.user.id)
+      throw new BadRequestException('You can change only your account');
 
-    res.status(200).send({ message: 'User successfully updated' });
+    const update = await this.userService.updateUserData(id, userData);
+
+    res.status(200).send(update);
+  }
+
+  // ============================================ Update user role
+  @UseGuards(JwtAuthGuard, AdminAccessGuard)
+  @Patch('/:id')
+  async updateUserRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() userData: UpdateUserRoleDto,
+    @Res() res: Response
+  ) {
+    const update = await this.userService.updateUserRole(id, userData);
+    console.log(
+      '🚀 ~ file: user.controller.ts:76 ~ UserController ~ update:',
+      update
+    );
+
+    if (!update)
+      throw new HttpException(
+        'Something vent wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+
+    res.status(200).send(update);
   }
 
   // ============================================ Delete user

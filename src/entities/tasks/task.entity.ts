@@ -1,4 +1,5 @@
 import { Category } from '@entities/categories/category.entity';
+import { User } from '@entities/user/user.entity';
 
 import {
   Column,
@@ -26,7 +27,11 @@ export class Task {
   @Column()
   dateEnd: Date;
 
+  @ManyToOne(() => User, user => user.id)
+  @JoinColumn({ name: 'author' })
+  author: User;
+
   @ManyToOne(() => Category, category => category.id)
-  @JoinColumn({ name: 'category_id' })
-  categoryId: Category;
+  @JoinColumn({ name: 'category' })
+  category: Category;
 }
