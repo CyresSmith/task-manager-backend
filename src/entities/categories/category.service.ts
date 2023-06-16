@@ -1,7 +1,8 @@
-import { User } from '@entities/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { User } from '@entities/user/user.entity';
 
 import { Category } from './category.entity';
 import { CreateCategoryDto } from './dto/createCategory.dto';
@@ -34,10 +35,10 @@ export class CategoryService {
   }
 
   // ============================================ Get category by ID
-  public async getCategoryById(id: string) {
+  public async getCategoryById(id: number) {
     return await this.categoryRepository
       .createQueryBuilder('category')
-      .where(id)
+      .where({ id })
       .leftJoinAndSelect('category.author', 'User')
       .select(['category', 'User.id', 'User.email', 'User.role'])
       .getOne();
@@ -58,7 +59,6 @@ export class CategoryService {
 
   // ============================================ Delete category
   public async deleteCategory(id: number) {
-    const isDeleted = await this.categoryRepository.delete(id);
-    return isDeleted;
+    return await this.categoryRepository.delete(id);
   }
 }

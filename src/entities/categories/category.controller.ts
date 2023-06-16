@@ -1,4 +1,3 @@
-import { E_Roles } from '@entities/user/types';
 import {
   Controller,
   Post,
@@ -11,18 +10,18 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
-  Patch,
   Put,
   BadRequestException,
   ParseIntPipe,
   Delete,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Response } from 'express';
+
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
 import { AdminAccessGuard } from 'src/guards/adminAccess.guard';
 
 import { CategoryService } from './category.service';
+
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { UpdateCategoryDto } from './dto/updateCategory.dto';
 
@@ -71,7 +70,10 @@ export class CategoryController {
 
   // ============================================ Get category by ID
   @Get('/:id')
-  async getCategoriesById(@Param() id: string, @Res() res: Response) {
+  async getCategoriesById(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response
+  ) {
     const category = await this.categoryService.getCategoryById(id);
 
     if (!category)
@@ -88,6 +90,14 @@ export class CategoryController {
     @Body() data: UpdateCategoryDto,
     @Res() res: Response
   ) {
+    if (Object.keys(data).length === 0)
+      throw new BadRequestException('Nothing to update');
+
+    const existCategory = this.categoryService.getCategoryById(id);
+
+    if (!existCategory)
+      throw new BadRequestException(`Category with id: ${id} not found`);
+
     const updatedCategory = await this.categoryService.updateCategory(id, data);
 
     if (!updatedCategory)
@@ -106,6 +116,11 @@ export class CategoryController {
     @Param('id', ParseIntPipe) id: number,
     @Res() res: Response
   ) {
+    const existCategory = this.categoryService.getCategoryById(id);
+
+    if (!existCategory)
+      throw new BadRequestException(`Category with id: ${id} not found`);
+
     const isDeleted = await this.categoryService.deleteCategory(id);
 
     if (!isDeleted)
