@@ -6,6 +6,7 @@ import { hash } from 'bcrypt';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { UpdateUserRoleDto } from './dto/updateUserRole.dto';
 
 @Injectable()
 export class UserService {
@@ -49,7 +50,28 @@ export class UserService {
 
   // ============================================ Update user data
   public async updateUserData(id: number, userData: UpdateUserDto) {
-    return await this.userRepository.update({ id }, userData);
+    const update = await this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set(userData)
+      .where({ id })
+      .returning(['id', 'email', 'role'])
+      .execute();
+
+    return update.raw[0];
+  }
+
+  // ============================================ Update user role
+  public async updateUserRole(id: number, userData: UpdateUserRoleDto) {
+    const update = await this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set(userData)
+      .where({ id })
+      .returning(['id', 'email', 'role'])
+      .execute();
+
+    return update.raw[0];
   }
 
   // ============================================ Delete user
