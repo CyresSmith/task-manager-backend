@@ -17,6 +17,9 @@ export class User {
   @Column({ name: 'role', type: 'enum', enum: E_Roles, nullable: false })
   role: E_Roles;
 
+  @Column({ name: 'token', type: 'varchar', nullable: true })
+  token: string;
+
   @OneToMany(() => Category, category => category.id)
   categories: Category;
 }

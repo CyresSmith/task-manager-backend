@@ -18,6 +18,9 @@ export class Task {
   @Column({ name: 'name', type: 'varchar' })
   name: string;
 
+  @Column({ name: 'desc', type: 'varchar' })
+  desc: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

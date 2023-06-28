@@ -73,10 +73,6 @@ export class UserController {
     @Res() res: Response
   ) {
     const update = await this.userService.updateUserRole(id, userData);
-    console.log(
-      '🚀 ~ file: user.controller.ts:76 ~ UserController ~ update:',
-      update
-    );
 
     if (!update)
       throw new HttpException(

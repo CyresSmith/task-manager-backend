@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsNotEmpty,
   IsISO8601,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateTaskDto {
@@ -20,13 +21,25 @@ export class CreateTaskDto {
   })
   name: string;
 
+  @IsString()
+  @IsNotEmpty({
+    message: 'Description is required',
+  })
+  @MinLength(3, {
+    message: 'Description should have a minimum length of 3',
+  })
+  @MaxLength(100, {
+    message: 'Description should have a maximum length of 50',
+  })
+  desc: string;
+
   @IsISO8601()
   dateStart: Date;
 
   @IsISO8601()
   dateEnd: Date;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty({
     message: 'Category is required',
   })

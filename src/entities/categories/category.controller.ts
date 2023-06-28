@@ -21,13 +21,17 @@ import { JwtAuthGuard } from 'src/guards/jwt.guard';
 import { AdminAccessGuard } from 'src/guards/adminAccess.guard';
 
 import { CategoryService } from './category.service';
+import { TaskService } from '@entities/tasks/task.service';
 
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { UpdateCategoryDto } from './dto/updateCategory.dto';
 
 @Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly tasksService: TaskService
+  ) {}
 
   // ============================================ Create category
   @UseGuards(JwtAuthGuard)
@@ -61,9 +65,6 @@ export class CategoryController {
         'Something went wrong',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
-
-    if (categories.length === 0)
-      throw new NotFoundException('Categories not found');
 
     res.status(200).send(categories);
   }

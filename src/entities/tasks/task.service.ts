@@ -66,6 +66,14 @@ export class TaskService {
       .getOne();
   }
 
+  // ============================================ Count tasks by category
+  public async countTasksByCategory(category: string) {
+    return await this.taskRepository
+      .createQueryBuilder('task')
+      .where({ category })
+      .getCount();
+  }
+
   // ============================================ Update task
   public async updateTask(id: number, data: UpdateTaskDto) {
     const update = await this.taskRepository

@@ -88,8 +88,6 @@ export class TaskController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
 
-    if (tasks.length === 0) throw new NotFoundException('Tasks not found');
-
     res.status(200).send(tasks);
   }
 

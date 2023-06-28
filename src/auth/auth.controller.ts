@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   HttpCode,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -35,6 +36,30 @@ export class AuthController {
   @Post('login')
   async login(@Body() userData: LoginUserDto, @Res() res: Response) {
     const response = await this.authService.loginUser(userData);
+
+    res.status(200).send(response);
+  }
+
+  // ============================================ Current user
+  @UseGuards(JwtAuthGuard)
+  @Get('current')
+  async current(@Req() req: Request, @Res() res: Response) {
+    const authorizationHeader = req.headers.authorization;
+
+    if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+      const token = authorizationHeader.substring(7);
+
+      const response = await this.authService.getCurrentUser(token);
+
+      res.status(200).send(response);
+    }
+  }
+
+  // ============================================ Logout user
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Body() body: { id: number }, @Res() res: Response) {
+    const response = await this.authService.logoutUser(body.id);
 
     res.status(200).send(response);
   }

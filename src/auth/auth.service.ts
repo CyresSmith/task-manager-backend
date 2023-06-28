@@ -37,10 +37,32 @@ export class AuthService {
     if (!validPassword)
       throw new UnauthorizedException('Email or password is wrong');
 
-    const { password, ...user } = existUser;
+    const { password, token, ...user } = existUser;
 
-    const token = await this.tokenService.generateJwtToken(user);
+    const newToken = await this.tokenService.generateJwtToken(user);
 
-    return { user, token };
+    await this.userService.updateUserToken(user.id, newToken);
+
+    return { user, token: newToken };
+  }
+
+  // ============================================ Get current user
+  async getCurrentUser(token: string) {
+    const response = await this.tokenService.verifyJwtToken(token);
+
+    const user = await this.userService.findUserByToken(response.token);
+
+    if (!user) throw new BadRequestException('User not found');
+
+    return user;
+  }
+
+  // ============================================ Logout user
+  async logoutUser(id: number) {
+    const update = await this.userService.updateUserToken(id, null);
+
+    if (!update) throw new BadRequestException('User not found');
+
+    return 'User successfully logout';
   }
 }

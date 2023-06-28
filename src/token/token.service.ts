@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 const { ACCESS_SECRET: secret, EXPIRE_TIME: expiresIn } = process.env;
@@ -10,9 +10,20 @@ export class TokenService {
   // ============================================ Generate JWT token
   async generateJwtToken(user) {
     const payload = { user };
-    return this.jwtService.sign(payload, {
+    return this.jwtService.signAsync(payload, {
       secret,
       expiresIn,
     });
+  }
+
+  // ============================================ Verify JWT token
+  async verifyJwtToken(token: string) {
+    const response = await this.jwtService.verifyAsync(token, { secret });
+
+    if (!response) {
+      throw new UnauthorizedException('Token is invalid');
+    }
+
+    return response;
   }
 }

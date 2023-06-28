@@ -23,6 +23,15 @@ export class UserService {
     return existUser;
   }
 
+  // ============================================ Find user by token
+  public async findUserByToken(token: string) {
+    const existUser = await this.userRepository.findOne({
+      where: { token },
+    });
+
+    return existUser;
+  }
+
   // ============================================ Register new user
   public async createUser(userData: CreateUserDto) {
     const password = await hash(userData.password, 10);
@@ -59,6 +68,17 @@ export class UserService {
       .execute();
 
     return update.raw[0];
+  }
+
+  // ============================================ Update user token
+  public async updateUserToken(id: number, token: string | null) {
+    return await this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set({ token })
+      .where({ id })
+      .returning(['id', 'token'])
+      .execute();
   }
 
   // ============================================ Update user role
