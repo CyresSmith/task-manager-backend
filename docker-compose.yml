@@ -5,11 +5,11 @@ services:
     container_name: task_manager_postgres_db
     image: postgres:14
     environment:
-      POSTGRES_USER: task_manager
-      POSTGRES_PASSWORD: task_manager
-      PGDATA: /data/postgres
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=${POSTGRES_DATABASE}
     volumes:
-      - postgress:/d/GoIT/Git/task-manager/task-manager-backend/docker-volumes/postgres
+      - ./pgdata:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432
     networks:
@@ -30,6 +30,30 @@ services:
     networks:
       - task_manager
     restart: unless-stopped
+
+  nestjs:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: task_manager_nest-app:latest
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - ACCESS_SECRET=${ACCESS_SECRET}
+      - EXPIRE_TIME=${EXPIRE_TIME}
+    ports:
+      - '3000:3000'
+    container_name: task_manager_nest-app
+    depends_on:
+      - task_manager_postgres_db
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - task_manager
 
 networks:
   task_manager:
