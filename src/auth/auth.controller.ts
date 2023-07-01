@@ -27,9 +27,9 @@ export class AuthController {
   // ============================================ Register user
   @Post('register')
   async register(@Body() userData: CreateUserDto, @Res() res: Response) {
-    await this.authService.registerUser(userData);
+    const response = await this.authService.registerUser(userData);
 
-    res.status(201).send({ message: 'User successfully created' });
+    res.status(201).send(response);
   }
 
   // ============================================ Login user
@@ -58,10 +58,16 @@ export class AuthController {
   // ============================================ Logout user
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Body() body: { id: number }, @Res() res: Response) {
-    const response = await this.authService.logoutUser(body.id);
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const authorizationHeader = req.headers.authorization;
 
-    res.status(200).send(response);
+    if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+      const token = authorizationHeader.substring(7);
+
+      const response = await this.authService.logoutUser(token);
+
+      res.status(200).send(response);
+    }
   }
 
   // ============================================ Test

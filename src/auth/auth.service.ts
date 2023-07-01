@@ -23,7 +23,15 @@ export class AuthService {
 
     if (existUser) throw new BadRequestException('Email already in use');
 
-    await this.userService.createUser(userData);
+    const { password, token, ...user } = await this.userService.createUser(
+      userData
+    );
+
+    const newToken = await this.tokenService.generateJwtToken(user);
+
+    await this.userService.updateUserToken(user.id, newToken);
+
+    return { user, token: newToken };
   }
 
   // ============================================ Login user
@@ -38,6 +46,10 @@ export class AuthService {
       throw new UnauthorizedException('Email or password is wrong');
 
     const { password, token, ...user } = existUser;
+    console.log(
+      '🚀 ~ file: auth.service.ts:41 ~ AuthService ~ loginUser ~ user:',
+      user
+    );
 
     const newToken = await this.tokenService.generateJwtToken(user);
 
@@ -47,10 +59,12 @@ export class AuthService {
   }
 
   // ============================================ Get current user
-  async getCurrentUser(token: string) {
-    const response = await this.tokenService.verifyJwtToken(token);
+  async getCurrentUser(userToken: string) {
+    const response = await this.tokenService.verifyJwtToken(userToken);
 
-    const user = await this.userService.findUserByToken(response.token);
+    const { token, password, ...user } = await this.userService.findUserByToken(
+      response.token
+    );
 
     if (!user) throw new BadRequestException('User not found');
 
@@ -58,10 +72,12 @@ export class AuthService {
   }
 
   // ============================================ Logout user
-  async logoutUser(id: number) {
-    const update = await this.userService.updateUserToken(id, null);
+  async logoutUser(token: string) {
+    const user = await this.userService.findUserByToken(token);
 
-    if (!update) throw new BadRequestException('User not found');
+    if (!user) throw new BadRequestException('User not found');
+
+    await this.userService.updateUserToken(user.id, null);
 
     return 'User successfully logout';
   }

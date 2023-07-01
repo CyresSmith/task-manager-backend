@@ -31,29 +31,29 @@ services:
       - task_manager
     restart: unless-stopped
 
-  nestjs:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    image: task_manager_nest-app:latest
-    environment:
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
-      - ACCESS_SECRET=${ACCESS_SECRET}
-      - EXPIRE_TIME=${EXPIRE_TIME}
-    ports:
-      - '3000:3000'
-    container_name: task_manager_nest-app
-    depends_on:
-      - task_manager_postgres_db
-    volumes:
-      - .:/app
-      - /app/node_modules
-    networks:
-      - task_manager
+  # nestjs:
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #   image: task_manager_nest-app
+  #   environment:
+  #     - POSTGRES_HOST=${POSTGRES_HOST}
+  #     - POSTGRES_PORT=${POSTGRES_PORT}
+  #     - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+  #     - ACCESS_SECRET=${ACCESS_SECRET}
+  #     - EXPIRE_TIME=${EXPIRE_TIME}
+  #   ports:
+  #     - '3000:3000'
+  #   container_name: task_manager_nest-app
+  #   depends_on:
+  #     - task_manager_postgres_db
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - task_manager
 
 networks:
   task_manager:
