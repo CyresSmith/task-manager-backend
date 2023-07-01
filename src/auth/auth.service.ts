@@ -46,10 +46,6 @@ export class AuthService {
       throw new UnauthorizedException('Email or password is wrong');
 
     const { password, token, ...user } = existUser;
-    console.log(
-      '🚀 ~ file: auth.service.ts:41 ~ AuthService ~ loginUser ~ user:',
-      user
-    );
 
     const newToken = await this.tokenService.generateJwtToken(user);
 
@@ -62,8 +58,12 @@ export class AuthService {
   async getCurrentUser(userToken: string) {
     const response = await this.tokenService.verifyJwtToken(userToken);
 
+    if (!response) {
+      throw new BadRequestException('Token is invalid');
+    }
+
     const { token, password, ...user } = await this.userService.findUserByToken(
-      response.token
+      userToken
     );
 
     if (!user) throw new BadRequestException('User not found');
